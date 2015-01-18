@@ -1,7 +1,7 @@
 package net.gorbov;
 
 /**
- * Created by Mihail on 15.01.2015.
+ * This is universal interface of Kettle.
  */
 public interface Kettle {
 
@@ -9,8 +9,10 @@ public interface Kettle {
     boolean openLid();
     boolean closeLid();
     int getCurrentVolume();
+    int getCurrentTemperature();
     boolean addWater(int volume, int currentTemperature);
-    boolean pourWater(int volume);
+    boolean pourOutWater(int volume);
     boolean startBoil();
     boolean stopBoil();
+    void finalizeKettle();
 }

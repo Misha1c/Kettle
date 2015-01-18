@@ -1,7 +1,6 @@
 import net.gorbov.ElectricKettle;
 import net.gorbov.Kettle;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.*;
 
@@ -111,4 +110,36 @@ public class KettleTest {
         kettle.closeLid();
         assertFalse(kettle.startBoil());
     }
+
+    @Test
+    public void stopBoil() {
+
+        try {
+            Kettle kettle = new ElectricKettle(1000, 2000);
+            kettle.openLid();
+            kettle.addWater(2000, 30);
+            kettle.closeLid();
+
+            Thread.sleep(2000);
+
+            kettle.startBoil();
+
+            Thread.sleep(200);
+
+            int currentTemperature = kettle.getCurrentTemperature();
+            assertTrue(currentTemperature > 30);
+
+            kettle.stopBoil();
+
+            Thread.sleep(2000);
+            assertTrue(currentTemperature > kettle.getCurrentTemperature());
+
+            kettle.finalizeKettle();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Mihail on 16.01.2015.
+ * Implementation kettle interface.
  */
 public class ElectricKettle implements Kettle {
 
@@ -110,7 +110,7 @@ public class ElectricKettle implements Kettle {
     }
 
     @Override
-    public boolean pourWater(int volume) {
+    public boolean pourOutWater(int volume) {
 
         if(volume>currentVolume){
             return false;
@@ -118,6 +118,11 @@ public class ElectricKettle implements Kettle {
 
         currentVolume -= volume;
         return true;
+    }
+
+    @Override
+    public int getCurrentTemperature(){
+        return currentTemperature.get();
     }
 
     @Override
@@ -155,6 +160,11 @@ public class ElectricKettle implements Kettle {
         return true;
     }
 
+    @Override
+    public void finalizeKettle(){
+        service.shutdown();
+    }
+
     private void boilService(){
 
         serviceStarted = true;
@@ -186,14 +196,15 @@ public class ElectricKettle implements Kettle {
         try {
             while (true){
 
+                Thread.sleep(1000);
+
                 if(currentTemperature.get() > minTemperature){
                     currentTemperature.decrementAndGet();
                 }else if (currentTemperature.get() < minTemperature) {
                     currentTemperature.incrementAndGet();
                 }
 
-                Thread.sleep(1000);
-                System.out.println("Current temperature = "+currentTemperature);
+                System.out.println("Current temperature (temperatureStabilizingService) = "+currentTemperature.get());
 
             }
         } catch (InterruptedException e) {
