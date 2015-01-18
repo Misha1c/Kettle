@@ -12,19 +12,23 @@ public class ElectricKettle implements Kettle {
     private int maxVolume;
     private int minVolume;
     private int currentVolume       = 0;
-    private AtomicInteger currentTemperature;
+    private AtomicInteger currentTemperature = new AtomicInteger();
     private int minTemperature      = 0;
-    volatile private boolean isBoil = false;
+    private boolean isBoil          = false;
     private boolean lidIsOpen       = false;
     private boolean serviceStarted  = false;
 
     ExecutorService service = Executors.newFixedThreadPool(2);
 
-    ElectricKettle(int minVolume, int maxVolume) throws UnsupportedOperationException{
+    public ElectricKettle(int minVolume, int maxVolume) {
 
-        if(maxVolume == 0 ){
-            throw new UnsupportedOperationException("maxVolume == 0");
+        if(maxVolume <= 0 ){
+            throw new UnsupportedOperationException("maxVolume <= 0");
         }
+        if(minVolume <= 0 ){
+            throw new UnsupportedOperationException("minVolume <= 0");
+        }
+
         if (maxVolume < minVolume){
             throw new UnsupportedOperationException("maxVolume < minVolume");
         }
@@ -79,13 +83,25 @@ public class ElectricKettle implements Kettle {
             return false;
         }
 
+        if(volume <= 0){
+            return false;
+        }
+
+        if(currentTemperature < 0){
+            return false;
+        }
+
+        if(currentTemperature > 100){
+            return false;
+        }
+
         currentVolume += volume;
         this.currentTemperature.set(currentTemperature);
 
         if(!serviceStarted){
             service.submit(new Runnable() {
                 public void run() {
-                    startBoilService();
+                    boilService();
                 }
             });
         }
@@ -120,7 +136,7 @@ public class ElectricKettle implements Kettle {
         if(!serviceStarted){
             service.submit(new Runnable() {
                 public void run() {
-                    startBoilService();
+                    boilService();
                 }
             });
         }
@@ -139,7 +155,7 @@ public class ElectricKettle implements Kettle {
         return true;
     }
 
-    private void startBoilService(){
+    private void boilService(){
 
         serviceStarted = true;
 
